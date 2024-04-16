@@ -6,8 +6,8 @@
 // 2022-03-24, Kjeld Jensen, First version
 
 // Configuration
-#define WIFI_SSID       "EMLI_TEAM_XX"
-#define WIFI_PASSWORD    ""
+#define WIFI_SSID       "EMLI_TEAM_10"
+#define WIFI_PASSWORD    "emliemli"
 
 #define MQTT_SERVER      "io.adafruit.com"
 #define MQTT_SERVERPORT  1883 
