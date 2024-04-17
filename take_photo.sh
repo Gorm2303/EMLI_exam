@@ -13,6 +13,10 @@ FILEPATH="$DIR/$FILENAME"
 # Take a photo
 raspistill -o $FILEPATH
 
+# Log Photo captured
+echo "$(date) - Photo captured" >> /path/to/logfile.log
+
+
 # Extract metadata from the photo
 EXIF_ISO=$(exiftool -ISO $FILEPATH | awk -F': ' '{print $2}')
 EXIF_EXPOSURE_TIME=$(exiftool -ExposureTime $FILEPATH | awk -F': ' '{print $2}')
