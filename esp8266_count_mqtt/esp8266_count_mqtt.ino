@@ -4,8 +4,8 @@
 #include <Adafruit_MQTT_Client.h>
 
 // WiFi credentials and MQTT settings
-#define WIFI_SSID       "EMLI_TEAM_XX"
-#define WIFI_PASSWORD   ""
+#define WIFI_SSID       "EMLI_TEAM_10"
+#define WIFI_PASSWORD   "emliemli"
 #define MQTT_SERVER     "io.adafruit.com"
 #define MQTT_SERVERPORT  1883
 #define MQTT_USERNAME   ""
