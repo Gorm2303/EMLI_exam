@@ -2,6 +2,9 @@
 
 # sudo apt install libimage-exiftool-perl jq
 
+# Set the default trigger to 'Time' unless another trigger is provided as an argument
+TRIGGER_TYPE="${1:-Time}"
+
 # Directory based on current date
 DIR=$(date +%F)
 mkdir -p "$DIR"
@@ -14,8 +17,7 @@ FILEPATH="$DIR/$FILENAME"
 raspistill -o $FILEPATH
 
 # Log Photo captured
-echo "$(date) - Photo captured" >> /path/to/logfile.log
-
+echo "$(date) - Photo captured with trigger $TRIGGER_TYPE" >> /path/to/logfile.log
 
 # Extract metadata from the photo
 EXIF_ISO=$(exiftool -ISO $FILEPATH | awk -F': ' '{print $2}')
@@ -33,11 +35,11 @@ JSON_FMT='{
   "File Name": "%s",
   "Create Date": "%s",
   "Create Seconds Epoch": %d,
-  "Trigger": "Time",
+  "Trigger": "%s",
   "Subject Distance": "%s m",
   "Exposure Time": "%s",
   "ISO": %d
 }'
-printf "$JSON_FMT" "$FILENAME" "$CREATE_DATE" "$EPOCH_MILLIS" "$EXIF_SUBJECT_DISTANCE" "$EXIF_EXPOSURE_TIME" "$EXIF_ISO" | jq . > "$DIR/$(basename $FILEPATH .jpg).json"
+printf "$JSON_FMT" "$FILENAME" "$CREATE_DATE" "$EPOCH_MILLIS" "$TRIGGER_TYPE" "$EXIF_SUBJECT_DISTANCE" "$EXIF_EXPOSURE_TIME" "$EXIF_ISO" | jq . > "$DIR/$(basename $FILEPATH .jpg).json"
 
-echo "Photo and metadata saved to $DIR"
+echo "Photo and metadata saved to $DIR with Trigger: $TRIGGER_TYPE"
