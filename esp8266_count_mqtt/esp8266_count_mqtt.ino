@@ -3,15 +3,6 @@
 #include <Adafruit_MQTT.h>
 #include <Adafruit_MQTT_Client.h>
 
-// WiFi credentials and MQTT settings
-#define WIFI_SSID       "EMLI_TEAM_10"
-#define WIFI_PASSWORD   "emliemli"
-#define MQTT_SERVER     "io.adafruit.com"
-#define MQTT_SERVERPORT  1883
-#define MQTT_USERNAME   ""
-#define MQTT_KEY        ""
-#define MQTT_TOPIC      MQTT_USERNAME "/feeds/count"
-
 // Wi-Fi and MQTT Clients
 ESP8266WiFiMulti WiFiMulti;
 WiFiClient wifi_client;
@@ -45,12 +36,13 @@ void setup() {
 
 // Main program loop
 void loop() {
+  if (WiFiMulti.run() != WL_CONNECTED || !mqtt.connected()) {
+    connectToWiFiAndMQTT();
+  }
+
   if (publish_flag) {
-    if (WiFiMulti.run() == WL_CONNECTED && mqtt.connected()) {
+    if (mqtt.connected()) {
       publishData();
-    } else {
-      // Reconnect to WiFi and MQTT if necessary
-      connectToWiFiAndMQTT();
     }
     publish_flag = false;  // Reset the flag after attempting to publish
   }
@@ -73,15 +65,22 @@ void connectToWiFiAndMQTT() {
   // Check WiFi connection
   if (WiFiMulti.run() != WL_CONNECTED) {
     Serial.println("Connecting to WiFi...");
-    delay(1000);
+    delay(1000); // Short delay to allow WiFi to establish
   }
+
   // Check MQTT connection
   if (!mqtt.connected()) {
     Serial.println("Connecting to MQTT...");
-    while (mqtt.connect() != 0) { // connect will return 0 for connected
-      Serial.println("MQTT connect failed. Retrying...");
+    int8_t ret = mqtt.connect();
+    while (ret != 0) { // connect will return 0 for connected
+      Serial.print("MQTT connect failed, rc=");
+      Serial.print(ret);
+      Serial.println("; try again in 5 seconds");
+      mqtt.disconnect();
       delay(5000);  // wait 5 seconds before retrying
+      ret = mqtt.connect();
     }
     Serial.println("MQTT Connected!");
   }
 }
+
