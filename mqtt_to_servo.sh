@@ -1,11 +1,7 @@
 #!/bin/bash
 
-# MQTT Topic and Broker Settings
-MQTT_SERVER="io.adafruit.com"
-MQTT_PORT=1883
-MQTT_TOPIC="YOUR_USERNAME/feeds/rain"
-MQTT_USERNAME="YOUR_USERNAME"
-MQTT_PASSWORD="YOUR_PASSWORD"
+# Load the environment variables
+source ./.env_secrets
 
 # Serial Port connected to Pico
 SERIAL_PORT="/dev/ttyACM0"
@@ -14,7 +10,7 @@ SERIAL_PORT="/dev/ttyACM0"
 exec 3>$SERIAL_PORT
 
 # Subscribe to MQTT topic and forward JSON messages to the Pico via serial
-mosquitto_sub -h $MQTT_SERVER -p $MQTT_PORT -t $MQTT_TOPIC -u $MQTT_USERNAME -P $MQTT_PASSWORD | while read -r message; do
+mosquitto_sub -h $MQTT_SERVER -p $MQTT_PORT -t $MQTT_TOPIC_RAIN -u $MQTT_USERNAME -P $MQTT_PASSWORD | while read -r message; do
     echo "Received MQTT message: $message"
     if [[ "$message" == "Wipe lens" ]]; then
         echo "Activating servo to wipe lens..."

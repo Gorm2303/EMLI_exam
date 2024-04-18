@@ -14,7 +14,7 @@ FILENAME=$(date +%H%M%S_%3N).jpg
 FILEPATH="$DIR/$FILENAME"
 
 # Take a photo
-raspistill -o $FILEPATH
+rpicam-still -t 0.01 -o $FILEPATH
 
 # Log Photo captured
 echo "$(date) - Photo captured with trigger $TRIGGER_TYPE" >> ./logfile.log
