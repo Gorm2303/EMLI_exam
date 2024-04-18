@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Load the environment variables
-source ./.env_secrets
+source ../.env_secrets
 
 # File to store the log data
 logfile="./wifi.log"
@@ -10,7 +10,10 @@ logfile="./wifi.log"
 ip_address="${CAMERA_IP}"
 
 # Function to log ping details
-log_ping_details() {
+log_wifi_and_ping() {
+    # Read the WiFi link quality and signal level from /proc/net/wireless
+    read -r link_quality signal_level < <(awk 'NR==3 {print int($3 * 10/7), $4}' /proc/net/wireless)
+
     # Ping the IP address with a timeout of 1 second, sending only 1 packet
     ping_result=$(ping -c 1 -W 1 $ip_address)
     
@@ -27,7 +30,8 @@ log_ping_details() {
     epoch_time=$(date +%s)
 
     # Append the data to a logfile
-    echo "$epoch_time, Ping Status: $success_status" >> $logfile
+    echo "$epoch_time, Link Quality: $link_quality%, Signal Level: $signal_level dBm, Ping Status: $success_status" >> $logfile
 }
 
-log_ping_details
+
+log_wifi_and_ping
