@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Define the SSIDs of the wildlife cameras
-CAMERA_SSIDS=("Camera1SSID" "Camera2SSID" "Camera3SSID")
+# Load the environment variables
+source ./.env_secrets
 
 # Function to scan for WiFi networks and connect to camera SSIDs
 function search_and_connect() {
@@ -12,7 +12,7 @@ function search_and_connect() {
         if echo "$available_ssids" | grep -wq "$ssid"; then
             echo "Found camera network: $ssid"
             echo "Attempting to connect..."
-            nmcli dev wifi connect "$ssid" password 'camera_password'  # Replace 'camera_password' with actual password
+            nmcli dev wifi connect "$ssid" password "${WIFI_PASSWORD[@]}"  # Replace 'camera_password' with actual password
             if [ $? -eq 0 ]; then
                 echo "Connected successfully to $ssid"
                 echo "Offloading data..."
@@ -36,5 +36,5 @@ function search_and_connect() {
 while true; do
     search_and_connect
     echo "Waiting for next flight cycle..."
-    sleep 60  # Wait for 60 seconds before the next cycle
+    sleep 1  # Wait for 60 seconds before the next cycle
 done
