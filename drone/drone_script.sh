@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Load the environment variables
-source ./.env_secrets
+source ../.env_secrets
 
 # Function to scan for WiFi networks and connect to camera SSIDs
 function search_and_connect() {
