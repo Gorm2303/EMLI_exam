@@ -57,14 +57,14 @@ function offload_data() {
         for file in $(curl -s "$camera_ip/$folder" | grep -Po '(?<=href=")[^"]*'); do
             if [[ "$file" =~ \.json$ ]]; then
                 # Check if this file has already been copied
-                if ! grep -q '"Drone Copy":' "/path/to/save/data/$folder$file"; then
+                if ! grep -q '"Drone Copy":' "/pictures/$folder$file"; then
                     # Update JSON file on camera server before downloading
                     local epoch_time=$(date +%s)
                     curl -X POST "$camera_ip/$folder$file" -d '{"Drone Copy": {"Drone ID": "WILDDRONE-001", "Seconds Epoch": '"$epoch_time"'}}'
                     
                     # Now download the photo and JSON file
-                    wget -P /path/to/save/data/$folder "$camera_ip/$folder${file%json}jpg"
-                    wget -P /path/to/save/data/$folder "$camera_ip/$folder$file"
+                    wget -P /pictures/$folder "$camera_ip/$folder${file%json}jpg"
+                    wget -P /pictures/$folder "$camera_ip/$folder$file"
                 fi
             fi
         done
