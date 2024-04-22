@@ -75,5 +75,5 @@ function offload_data() {
 while true; do
     search_and_connect
     echo "Waiting for next flight cycle..."
-    sleep 60  # Wait for 60 seconds before the next cycle
+    sleep 5  # Wait for 60 seconds before the next cycle
 done
