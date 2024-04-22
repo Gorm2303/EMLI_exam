@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Directory where images and JSON files are stored
-IMAGE_DIR="/path/to/save/data"
+IMAGE_DIR="./drone/pictures/"
 
 # Navigate to the image directory
 cd "$IMAGE_DIR"
