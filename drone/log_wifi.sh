@@ -3,9 +3,6 @@
 # Load the environment variables
 source ../.env_secrets
 
-# File to store the log data
-logfile="./wifi.log"
-
 # IP address to ping
 ip_address="${CAMERA_IP}"
 
@@ -29,8 +26,19 @@ log_wifi_and_ping() {
     # Get current epoch time
     epoch_time=$(date +%s)
 
-    # Append the data to a logfile
-    echo "$epoch_time, Link Quality: $link_quality%, Signal Level: $signal_level dBm, Ping Status: $success_status" >> $logfile
+    # Append the data to a log variable
+    LOG_MESSAGE="$epoch_time, Link Quality: $link_quality%, Signal Level: $signal_level dBm, Ping Status: $success_status"
+
+    # SQL Command to insert the log into the database
+    SQL="INSERT INTO wifi_stats (epoch_time, link_quality, signal_level, success_status) VALUES ('$epoch_time', '$link_quality', '$signal_level', '$success_status');"
+
+    # Execute SQL Command using MySQL
+    if ! mysql -u"$DB_USER" -p"$DB_PASS" -h"$DB_HOST" "$DB_NAME" -e "$SQL"; then
+        echo "Failed to insert data"
+        exit 1
+    else
+        echo "Data logged successfully"
+    fi
 }
 
 
