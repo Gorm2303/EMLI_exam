@@ -4,9 +4,8 @@
 TAKE_PHOTO_SCRIPT="./take_photo.sh"
 MOTION_DETECT_SCRIPT="./motion_detect.py"
 
-# Minute counter and interval for time-triggered photos
-minute_counter=0
-time_interval=5  # Interval in minutes for "Time" triggered photos
+# Second counter for time-triggered photos
+second_counter=0
 
 # Log file path
 LOG_FILE="./logfile.log"
@@ -24,9 +23,10 @@ while true; do
     current_file_path=$(find "$DIR" -type f -name '*.jpg' | sort | tail -n 1)
     
     # Every 5 minutes, take a photo with trigger "Time"
-    if (( minute_counter % ($time_interval * 60) == 0 )); then
+    if (( second_counter == 300 )); then  # 300 seconds equals 5 minutes
         bash $TAKE_PHOTO_SCRIPT "Time"
         echo "Photo taken with trigger 'Time' every 5 minutes."
+        second_counter=0  # Reset counter after taking a time-triggered photo
     fi
 
     # Check for motion if there is a previous file to compare with
@@ -50,6 +50,6 @@ while true; do
     # Sleep for 1 second before taking the next photo
     sleep 1
 
-    # Increment the minute counter
-    ((minute_counter++))
+    # Increment the second counter
+    ((second_counter++))
 done

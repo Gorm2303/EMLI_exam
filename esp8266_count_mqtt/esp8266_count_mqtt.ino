@@ -1,13 +1,12 @@
 #include <ESP8266WiFiMulti.h>
 #include <ESP8266HTTPClient.h>
-#include <Adafruit_MQTT.h>
-#include <Adafruit_MQTT_Client.h>
+#include <PubSubClient.h>
+#include "secrets.h"
 
 // Wi-Fi and MQTT Clients
 ESP8266WiFiMulti WiFiMulti;
-WiFiClient wifi_client;
-Adafruit_MQTT_Client mqtt(&wifi_client, MQTT_SERVER, MQTT_SERVERPORT, MQTT_USERNAME, MQTT_KEY);
-Adafruit_MQTT_Publish count_mqtt_publish(&mqtt, MQTT_TOPIC);
+WiFiClient espClient;
+PubSubClient mqttClient(espClient);
 
 // GPIO pin for the interrupt
 #define GPIO_INTERRUPT_PIN 4
@@ -30,20 +29,18 @@ void setup() {
   WiFi.mode(WIFI_STA);
   WiFiMulti.addAP(WIFI_SSID, WIFI_PASSWORD);
 
-  // Initial connection attempt
+  mqttClient.setServer(MQTT_SERVER, MQTT_SERVERPORT);
   connectToWiFiAndMQTT();
 }
 
 // Main program loop
 void loop() {
-  if (WiFiMulti.run() != WL_CONNECTED || !mqtt.connected()) {
+  if (WiFiMulti.run() != WL_CONNECTED || !mqttClient.connected()) {
     connectToWiFiAndMQTT();
   }
 
-  if (publish_flag) {
-    if (mqtt.connected()) {
-      publishData();
-    }
+  if (publish_flag && mqttClient.connected()) {
+    publishData();
     publish_flag = false;  // Reset the flag after attempting to publish
   }
 }
@@ -52,7 +49,7 @@ void loop() {
 void publishData() {
   char payload[10];
   sprintf(payload, "%lu", count);
-  if (count_mqtt_publish.publish(payload)) {
+  if (mqttClient.publish(MQTT_TOPIC, payload)) {
     Serial.println("Data published successfully");
     count = 0;  // Reset count after publishing
   } else {
@@ -63,24 +60,31 @@ void publishData() {
 // Function to ensure WiFi and MQTT are connected
 void connectToWiFiAndMQTT() {
   // Check WiFi connection
-  if (WiFiMulti.run() != WL_CONNECTED) {
+  if (WiFi.status() != WL_CONNECTED) {
+    // If not connected, attempt to connect
     Serial.println("Connecting to WiFi...");
-    delay(1000); // Short delay to allow WiFi to establish
+    WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+    delay(5000); // Wait 5 seconds before retrying
+  } else {
+    // If connected, print the SSID and message
+    Serial.print("Connected to ");
+    Serial.println(WiFi.SSID());
+    Serial.println("IP address: ");
+    Serial.println(WiFi.localIP());
+    delay(10000); // Delay further execution for 10 seconds to prevent spamming
   }
 
   // Check MQTT connection
-  if (!mqtt.connected()) {
+  if (!mqttClient.connected()) {
     Serial.println("Connecting to MQTT...");
-    int8_t ret = mqtt.connect();
-    while (ret != 0) { // connect will return 0 for connected
+    mqttClient.connect("mqttClientID", MQTT_USERNAME, MQTT_KEY); // Use a unique client ID
+    while (!mqttClient.connected()) {
       Serial.print("MQTT connect failed, rc=");
-      Serial.print(ret);
+      Serial.print(mqttClient.state());
       Serial.println("; try again in 5 seconds");
-      mqtt.disconnect();
       delay(5000);  // wait 5 seconds before retrying
-      ret = mqtt.connect();
+      mqttClient.connect("mqttClientID", MQTT_USERNAME, MQTT_KEY);
     }
     Serial.println("MQTT Connected!");
   }
 }
-
