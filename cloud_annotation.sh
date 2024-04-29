@@ -1,5 +1,5 @@
 #!/bin/bash
-
+source ./.env_secrets
 # Directory where images and JSON files are stored
 IMAGE_DIR="./drone/pictures/"
 
@@ -34,6 +34,9 @@ function annotate_image() {
 find . -type f -name '*.jpg' | while read -r image_path; do
     annotate_image "$image_path"
 done
+
+git config --global user.name "$GITHUB_USERNAME"
+git config --global http.extraHeader "Authorization: bearer $GITHUB_KEY"
 
 # Add and commit JSON metadata files
 echo "Adding updated JSON files to git..."
