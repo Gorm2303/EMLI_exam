@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Load the environment variables
-source ./.env_secrets
+source ../.env_secrets
 
 # Function to scan for WiFi networks and connect to camera SSIDs
 function search_and_connect() {
@@ -40,7 +40,7 @@ function search_and_connect() {
 function set_camera_time() {
     local drone_time=$(date +"%Y-%m-%d %T")
     # This assumes the camera server accepts a POST request to set time
-    curl -X POST -d "time=$current_time" http://$camera_ip/cgi-bin/sync_time.py
+    curl -X POST -d "time=$drone_time" http://$CAMERA_IP/cgi-bin/sync_time.sh
     echo "Camera time set to drone time: $drone_time"
 }
 
@@ -73,7 +73,16 @@ function offload_data() {
 
 # Main execution loop
 while true; do
-    search_and_connect
+    echo "Connected successfully to wifi"
+                
+    # Set camera's time to drone's system time
+    set_camera_time
+                
+    # Offload data
+    echo "Offloading data..."
+    offload_data "wifi"
+                
+    echo "Data offloading completed for wifi."
     echo "Waiting for next flight cycle..."
-    sleep 60  # Wait for 60 seconds before the next cycle
+    sleep 5  # Wait for 5 seconds before the next cycle
 done
