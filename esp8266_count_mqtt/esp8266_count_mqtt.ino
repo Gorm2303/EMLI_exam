@@ -60,9 +60,18 @@ void publishData() {
 // Function to ensure WiFi and MQTT are connected
 void connectToWiFiAndMQTT() {
   // Check WiFi connection
-  if (WiFiMulti.run() != WL_CONNECTED) {
+  if (WiFi.status() != WL_CONNECTED) {
+    // If not connected, attempt to connect
     Serial.println("Connecting to WiFi...");
-    delay(1000); // Short delay to allow WiFi to establish
+    WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+    delay(5000); // Wait 5 seconds before retrying
+  } else {
+    // If connected, print the SSID and message
+    Serial.print("Connected to ");
+    Serial.println(WiFi.SSID());
+    Serial.println("IP address: ");
+    Serial.println(WiFi.localIP());
+    delay(10000); // Delay further execution for 10 seconds to prevent spamming
   }
 
   // Check MQTT connection
