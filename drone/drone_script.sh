@@ -47,28 +47,53 @@ function set_camera_time() {
 # Function to offload data
 function offload_data() {
     local ssid=$1
-    local camera_ip="http://$CAMERA_IP/camera/camera"  # Adjust if necessary
+    local camera_base="http://$CAMERA_IP/camera/camera"  # Base URL for the camera
+    echo "Debug: Starting offload for camera at $camera_base"
 
-    # Download directory listing
-    for folder in $(curl -s "$camera_ip" | grep -Po '(?<=href=")[^"]*'); do
-        [[ "$folder" =~ /$ ]] || continue  # Skip non-directory entries
-        
-        # Check and download each file in the folder
-        for file in $(curl -s "$camera_ip/$folder" | grep -Po '(?<=href=")[^"]*'); do
-            if [[ "$file" =~ \.json$ ]]; then
-                # Check if this file has already been copied
-                if ! grep -q '"Drone Copy":' "./pictures/$folder$file"; then
-                    # Update JSON file on camera server before downloading
-                    local epoch_time=$(date +%s)
-                    curl -X POST "$camera_ip/$folder$file" -d '{"Drone Copy": {"Drone ID": "WILDDRONE-001", "Seconds Epoch": '"$epoch_time"'}}'
-                    
-                    # Now download the photo and JSON file
-                    wget -P ./pictures/$folder "$camera_ip/$folder${file%json}jpg"
-                    wget -P ./pictures/$folder "$camera_ip/$folder$file"
+    # Download directory listing and parse for directories
+    echo "Debug: Fetching directories from $camera_base"
+    local directories=$(curl -s "$camera_base" | grep -Po '(?<=href=")[^"]*')
+    
+    for path in $directories; do
+        # Ensure path ends with '/' to confirm it's a directory
+        if [[ "$path" =~ /$ ]]; then
+            local folder="${camera_base}/${path}"
+            # Remove double slashes except for protocol part
+            folder=$(echo $folder | sed 's#//\([^/]\)#/\1#g')
+
+            echo "Debug: Found directory $path"
+            echo "Debug: Processing folder $folder"
+
+            # Check and download each file in the folder
+            echo "Debug: Fetching files from $folder"
+            local files=$(curl -s "$folder" | grep -Po '(?<=href=")[^"]*')
+            
+            for file in $files; do
+                echo "Debug: Found file $file"
+                if [[ "$file" =~ \.json$ ]]; then
+                    echo "Debug: Found JSON file $file"
+
+                    # Check if this file has already been copied
+                    if ! grep -q '"Drone Copy":' "./pictures/$folder$file"; then
+                        echo "Debug: File $file has not been copied yet"
+
+                        # Update JSON file on camera server before downloading
+                        local epoch_time=$(date +%s)
+                        echo "Debug: Posting update to $folder$file"
+                        curl -X POST "$folder$file" -d '{"Drone Copy": {"Drone ID": "WILDDRONE-001", "Seconds Epoch": '"$epoch_time"'}}'
+
+                        # Now download the photo and JSON file
+                        echo "Debug: Downloading JSON and corresponding JPEG for $file"
+                        wget -P ./pictures/$folder "$folder${file%json}jpg"
+                        wget -P ./pictures/$folder "$folder$file"
+                    else
+                        echo "Debug: File $file has already been copied, skipping"
+                    fi
                 fi
-            fi
-        done
+            done
+        fi
     done
+    echo "Debug: Offload complete for camera at $camera_base"
 }
 
 # Main execution loop
