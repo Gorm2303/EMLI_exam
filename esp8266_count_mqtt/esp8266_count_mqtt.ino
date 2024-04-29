@@ -1,18 +1,12 @@
 #include <ESP8266WiFiMulti.h>
 #include <ESP8266HTTPClient.h>
 #include <PubSubClient.h>
+#include "secrets.h"
 
 // Wi-Fi and MQTT Clients
 ESP8266WiFiMulti WiFiMulti;
 WiFiClient espClient;
 PubSubClient mqttClient(espClient);
-
-// MQTT Server settings
-const char* mqtt_server = "MQTT_SERVER";
-const int mqtt_port = MQTT_SERVERPORT;
-const char* mqtt_username = "MQTT_USERNAME";
-const char* mqtt_password = "MQTT_KEY";
-const char* mqtt_topic = "MQTT_TOPIC";
 
 // GPIO pin for the interrupt
 #define GPIO_INTERRUPT_PIN 4
@@ -35,7 +29,7 @@ void setup() {
   WiFi.mode(WIFI_STA);
   WiFiMulti.addAP(WIFI_SSID, WIFI_PASSWORD);
 
-  mqttClient.setServer(mqtt_server, mqtt_port);
+  mqttClient.setServer(MQTT_SERVER, MQTT_SERVERPORT);
   connectToWiFiAndMQTT();
 }
 
@@ -55,7 +49,7 @@ void loop() {
 void publishData() {
   char payload[10];
   sprintf(payload, "%lu", count);
-  if (mqttClient.publish(mqtt_topic, payload)) {
+  if (mqttClient.publish(MQTT_TOPIC, payload)) {
     Serial.println("Data published successfully");
     count = 0;  // Reset count after publishing
   } else {
@@ -74,13 +68,13 @@ void connectToWiFiAndMQTT() {
   // Check MQTT connection
   if (!mqttClient.connected()) {
     Serial.println("Connecting to MQTT...");
-    mqttClient.connect("mqttClientID", mqtt_username, mqtt_password); // Use a unique client ID
+    mqttClient.connect("mqttClientID", MQTT_USERNAME, MQTT_KEY); // Use a unique client ID
     while (!mqttClient.connected()) {
       Serial.print("MQTT connect failed, rc=");
       Serial.print(mqttClient.state());
       Serial.println("; try again in 5 seconds");
       delay(5000);  // wait 5 seconds before retrying
-      mqttClient.connect("mqttClientID", mqtt_username, mqtt_password);
+      mqttClient.connect("mqttClientID", MQTT_USERNAME, MQTT_KEY);
     }
     Serial.println("MQTT Connected!");
   }
