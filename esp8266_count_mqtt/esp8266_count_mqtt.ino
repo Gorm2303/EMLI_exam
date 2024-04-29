@@ -1,13 +1,18 @@
 #include <ESP8266WiFiMulti.h>
 #include <ESP8266HTTPClient.h>
-#include <Adafruit_MQTT.h>
-#include <Adafruit_MQTT_Client.h>
+#include <PubSubClient.h>
 
 // Wi-Fi and MQTT Clients
 ESP8266WiFiMulti WiFiMulti;
-WiFiClient wifi_client;
-Adafruit_MQTT_Client mqtt(&wifi_client, MQTT_SERVER, MQTT_SERVERPORT, MQTT_USERNAME, MQTT_KEY);
-Adafruit_MQTT_Publish count_mqtt_publish(&mqtt, MQTT_TOPIC);
+WiFiClient espClient;
+PubSubClient mqttClient(espClient);
+
+// MQTT Server settings
+const char* mqtt_server = "MQTT_SERVER";
+const int mqtt_port = MQTT_SERVERPORT;
+const char* mqtt_username = "MQTT_USERNAME";
+const char* mqtt_password = "MQTT_KEY";
+const char* mqtt_topic = "MQTT_TOPIC";
 
 // GPIO pin for the interrupt
 #define GPIO_INTERRUPT_PIN 4
@@ -30,20 +35,18 @@ void setup() {
   WiFi.mode(WIFI_STA);
   WiFiMulti.addAP(WIFI_SSID, WIFI_PASSWORD);
 
-  // Initial connection attempt
+  mqttClient.setServer(mqtt_server, mqtt_port);
   connectToWiFiAndMQTT();
 }
 
 // Main program loop
 void loop() {
-  if (WiFiMulti.run() != WL_CONNECTED || !mqtt.connected()) {
+  if (WiFiMulti.run() != WL_CONNECTED || !mqttClient.connected()) {
     connectToWiFiAndMQTT();
   }
 
-  if (publish_flag) {
-    if (mqtt.connected()) {
-      publishData();
-    }
+  if (publish_flag && mqttClient.connected()) {
+    publishData();
     publish_flag = false;  // Reset the flag after attempting to publish
   }
 }
@@ -52,7 +55,7 @@ void loop() {
 void publishData() {
   char payload[10];
   sprintf(payload, "%lu", count);
-  if (count_mqtt_publish.publish(payload)) {
+  if (mqttClient.publish(mqtt_topic, payload)) {
     Serial.println("Data published successfully");
     count = 0;  // Reset count after publishing
   } else {
@@ -69,18 +72,16 @@ void connectToWiFiAndMQTT() {
   }
 
   // Check MQTT connection
-  if (!mqtt.connected()) {
+  if (!mqttClient.connected()) {
     Serial.println("Connecting to MQTT...");
-    int8_t ret = mqtt.connect();
-    while (ret != 0) { // connect will return 0 for connected
+    mqttClient.connect("mqttClientID", mqtt_username, mqtt_password); // Use a unique client ID
+    while (!mqttClient.connected()) {
       Serial.print("MQTT connect failed, rc=");
-      Serial.print(ret);
+      Serial.print(mqttClient.state());
       Serial.println("; try again in 5 seconds");
-      mqtt.disconnect();
       delay(5000);  // wait 5 seconds before retrying
-      ret = mqtt.connect();
+      mqttClient.connect("mqttClientID", mqtt_username, mqtt_password);
     }
     Serial.println("MQTT Connected!");
   }
 }
-
