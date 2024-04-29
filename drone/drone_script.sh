@@ -40,7 +40,7 @@ function search_and_connect() {
 function set_camera_time() {
     local drone_time=$(date +"%Y-%m-%d %T")
     # This assumes the camera server accepts a POST request to set time
-    curl -X POST -d "time=$drone_time" http://$CAMERA_IP/cgi-bin/sync_time.py
+    curl -X POST -d "time=$drone_time" http://$CAMERA_IP/cgi-bin/sync_time.sh
     echo "Camera time set to drone time: $drone_time"
 }
 
