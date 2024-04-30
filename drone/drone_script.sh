@@ -50,42 +50,29 @@ function offload_data() {
     local camera_base="http://$CAMERA_IP/camera/camera"  # Base URL for the camera
     echo "Debug: Starting offload for camera at $camera_base"
 
-    # Download directory listing and parse for directories
-    echo "Debug: Fetching directories from $camera_base"
-    local directories=$(curl -s "$camera_base" | grep -Po '(?<=href=")[^"]*')
-    
+    # Get list of directories and iterate
+    local directories=$(curl -s -X POST "http://$CAMERA_IP/cgi-bin/list_files.sh" -d "directory=")
     for path in $directories; do
-        # Ensure path ends with '/' to confirm it's a directory
         if [[ "$path" =~ /$ ]]; then
-            local folder="${camera_base}/${path}"
-            # Remove double slashes except for protocol part
-            folder=$(echo $folder | sed 's#//\([^/]\)#/\1#g')
-
             echo "Debug: Found directory $path"
-            echo "Debug: Processing folder $folder"
+            local files=$(curl -s -X POST "http://$CAMERA_IP/cgi-bin/list_files.sh" -d "directory=$path")
 
-            # Check and download each file in the folder
-            echo "Debug: Fetching files from $folder"
-            local files=$(curl -s "$folder" | grep -Po '(?<=href=")[^"]*')
-            
             for file in $files; do
-                echo "Debug: Found file $file"
                 if [[ "$file" =~ \.json$ ]]; then
                     echo "Debug: Found JSON file $file"
+                    local json_file_path="${path}${file}"
+                    local jpg_file="${file%json}jpg"
 
-                    # Check if this file has already been copied
-                    if ! grep -q '"Drone Copy":' "./pictures/$folder$file"; then
+                    # Check and update JSON file if not already marked
+                    if ! grep -q '"Drone Copy":' "./pictures/$json_file_path"; then
                         echo "Debug: File $file has not been copied yet"
-
-                        # Update JSON file on camera server before downloading
                         local epoch_time=$(date +%s)
-                        echo "Debug: Posting update to $folder$file"
-                        curl -X POST "$folder$file" -d '{"Drone Copy": {"Drone ID": "WILDDRONE-001", "Seconds Epoch": '"$epoch_time"'}}'
+                        curl -X POST "http://$CAMERA_IP/cgi-bin/update_json.sh?file=$json_file_path" -d '{"Drone Copy": {"Drone ID": "WILDDRONE-001", "Seconds Epoch": '"$epoch_time"'}}'
 
-                        # Now download the photo and JSON file
+                        # Download JSON and corresponding JPEG file
                         echo "Debug: Downloading JSON and corresponding JPEG for $file"
-                        wget -P ./pictures/$folder "$folder${file%json}jpg"
-                        wget -P ./pictures/$folder "$folder$file"
+                        wget -P ./pictures/$path "$camera_base/$jpg_file"
+                        wget -P ./pictures/$path "$camera_base/$json_file_path"
                     else
                         echo "Debug: File $file has already been copied, skipping"
                     fi
