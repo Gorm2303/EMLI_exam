@@ -19,7 +19,7 @@ FULL_DIRECTORY="${BASE_DIRECTORY}/${DIRECTORY}"
 # Check if directory exists
 if [ -d "$FULL_DIRECTORY" ]; then
     # List files in the directory
-    ls -1 $FULL_DIRECTORY
+    ls -1p $FULL_DIRECTORY
 else
     echo "Directory not found."
 fi
