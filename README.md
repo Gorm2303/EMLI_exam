@@ -24,19 +24,19 @@ This repository contains various scripts and programs used for a wildlife camera
 Run the scripts or upload the Arduino programs to your hardware. See the individual scripts and programs for more detailed usage instructions.
 
 ## .env-secrets
-MQTT_SERVER: The address of your MQTT server.
-MQTT_PORT: The port your MQTT server is running on.
-MQTT_TOPIC_TRIGGER: The MQTT topic for triggering the camera.
-MQTT_TOPIC_RAIN: The MQTT topic for the rain sensor.
-MQTT_USERNAME: The username for your MQTT server.
-MQTT_PASSWORD: The password for your MQTT server.
-SERIAL_PORT: The serial port for communication with the Raspberry Pi Pico.
-CAMERA_SSIDS: The SSIDs of the camera WiFi networks.
-WIFI_PASSWORD: The password for the WiFi networks.
-CAMERA_IP: The IP address of the camera.
-GITHUB_USERNAME: The username used for accessing GitHub.
-GITHUB_KEY: A personal access token that allows authentication and authorization with GitHub APIs.
-DB_USER: The username used for database access.
-DB_PASS: The password for the database user.
-DB_NAME: The name of the database to connect to.
-DB_HOST: The hostname or IP address of the database server.
+MQTT_SERVER: The address of your MQTT server.  
+MQTT_PORT: The port your MQTT server is running on.  
+MQTT_TOPIC_TRIGGER: The MQTT topic for triggering the camera.  
+MQTT_TOPIC_RAIN: The MQTT topic for the rain sensor.  
+MQTT_USERNAME: The username for your MQTT server.  
+MQTT_PASSWORD: The password for your MQTT server.  
+SERIAL_PORT: The serial port for communication with the Raspberry Pi Pico.  
+CAMERA_SSIDS: The SSIDs of the camera WiFi networks.  
+WIFI_PASSWORD: The password for the WiFi networks.  
+CAMERA_IP: The IP address of the camera.  
+GITHUB_USERNAME: The username used for accessing GitHub.  
+GITHUB_KEY: A personal access token that allows authentication and authorization with GitHub APIs.  
+DB_USER: The username used for database access.  
+DB_PASS: The password for the database user.  
+DB_NAME: The name of the database to connect to.  
+DB_HOST: The hostname or IP address of the database server.  
