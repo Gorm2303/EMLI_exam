@@ -5,7 +5,7 @@ echo "Content-Type: text/plain"
 echo ""
 
 # Read POST data from stdin
-read POST_DATA
+POST_DATA=$(cat)
 
 # Extract the filename from the query string
 FILENAME=$(echo "$QUERY_STRING" | sed 's/^.*file=\([^&]*\).*$/\1/')
@@ -20,7 +20,7 @@ if [[ ! -f "$FILE_PATH" ]]; then
 fi
 
 # Merge the POST data with the existing data in the JSON file
-jq -s '.[0] * .[1]' "$FILE_PATH" <(echo "$POST_DATA") > "$FILE_PATH.tmp" && mv "$FILE_PATH.tmp" "$FILE_PATH"
+jq '. + input' "$FILE_PATH" <(echo "$POST_DATA") > "$FILE_PATH.tmp" && mv "$FILE_PATH.tmp" "$FILE_PATH"
 
 if [[ $? -eq 0 ]]; then
     echo "File updated successfully"
