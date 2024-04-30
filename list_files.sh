@@ -11,7 +11,7 @@ read POST_DATA
 DIRECTORY=$(echo "$POST_DATA" | sed 's/^.*directory=\([^&]*\).*$/\1/')
 
 # Specify the base directory
-BASE_DIRECTORY="/usr/local/apache2/htdocs/camera/camera"
+BASE_DIRECTORY="/var/www/html"
 
 # Combine the base directory with the directory from the POST data
 FULL_DIRECTORY="${BASE_DIRECTORY}/${DIRECTORY}"

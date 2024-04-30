@@ -11,7 +11,7 @@ read POST_DATA
 FILENAME=$(echo "$QUERY_STRING" | sed 's/^.*file=\([^&]*\).*$/\1/')
 
 # Define the path to the file
-FILE_PATH="/usr/local/apache2/htdocs/camera/camera/${FILENAME}"
+FILE_PATH="/var/www/html/${FILENAME}"
 
 # Check if the file exists
 if [[ ! -f "$FILE_PATH" ]]; then
