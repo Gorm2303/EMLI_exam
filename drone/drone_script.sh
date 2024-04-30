@@ -51,17 +51,19 @@ function offload_data() {
     echo "Debug: Starting offload for camera at $camera_base"
 
     # Get list of directories and iterate
-    local directories=$(curl -s -X POST "http://$CAMERA_IP/cgi-bin/list_files.sh" -d "directory=")
+    local directories=$(curl -s -X POST "http://$CAMERA_IP/cgi-bin/list_files.sh" -d "directory=camera/camera")
+    echo "Debug: Found these: $directories"
     for path in $directories; do
         if [[ "$path" =~ /$ ]]; then
             echo "Debug: Found directory $path"
-            local files=$(curl -s -X POST "http://$CAMERA_IP/cgi-bin/list_files.sh" -d "directory=$path")
+            local files=$(curl -s -X POST "http://$CAMERA_IP/cgi-bin/list_files.sh" -d "directory=camera/camera/$path")
 
             for file in $files; do
                 if [[ "$file" =~ \.json$ ]]; then
                     echo "Debug: Found JSON file $file"
                     local json_file_path="${path}${file}"
-                    local jpg_file="${file%json}jpg"
+                    local jpg_file="${path}${file%json}jpg"
+		    echo "Debug: this photo will be downloaded: $jpg_file"
 
                     # Check and update JSON file if not already marked
                     if ! grep -q '"Drone Copy":' "./pictures/$json_file_path"; then
