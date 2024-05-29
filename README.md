@@ -4,13 +4,13 @@ This repository contains various scripts and programs used for a wildlife camera
 
 ## Structure
 - `camera/`: Contains scripts for controlling the camera, including external triggering, looping, and motion detection.
-- `cloud_annotation.sh`: A script for annotating photos in cloud.
+- `camera/cgi-scripts`: Contains common gateway interface scripts.
 - `drone/`: Contains scripts for controlling the drone and logging WiFi data.
 - `esp8266_count_mqtt/`: Contains an Arduino program for an ESP8266 module that communicates over MQTT.
+- `raspberry_pico/`: Contains an Arduino program for a Raspberry Pi Pico.
+- `cloud_annotation.sh`: A script for annotating photos in cloud.
 - `mqtt_to_servo.sh`: A script for controlling a servo over MQTT.
 - `pico_serial_to_mqtt.sh`: A script for sending data from a Raspberry Pi Pico over MQTT.
-- `raspberry_pico/`: Contains an Arduino program for a Raspberry Pi Pico.
-- `sync_time.sh`: Script for synchronizing time on the camera.
 
 
 ## Setup
